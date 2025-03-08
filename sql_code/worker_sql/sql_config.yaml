@@ -1,0 +1,8 @@
+project_id: "your_project"
+dataset: "your_dataset"
+raw_data_table: "mapped_location_data"
+stay_time_table: "stay_time_data"
+worker_list_table: "worker_list"
+visitor_list_table: "visitor_list"
+worker_data_table: "worker_data"
+visitor_data_table: "visitor_data"
