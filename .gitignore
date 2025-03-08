@@ -1,0 +1,26 @@
+# Python関連（仮想環境やキャッシュ）
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.env
+
+# データ関連（CSV, JSON, GeoJSON など）
+data/
+*.csv
+*.json
+*.parquet
+*.geojson
+
+# BigQuery の一時ファイル
+*.bq
+*.temp
+
+# ログファイル & IDE 設定
+*.log
+.DS_Store
+.vscode/
+.idea/
+
+# シェルスクリプトの一時ファイル
+*.sh~
