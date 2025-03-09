@@ -1,26 +1,28 @@
 #!/bin/bash
 
-# プロジェクトを指定
-PROJECT_NAME="\$1"
+# BigQuery プロジェクトIDとデータセットを指定
+PROJECT_ID="rd-dapj-dev"
+DATASET="raw_daimaruyu_data"
 
-if [ -z "\$PROJECT_NAME" ]; then
-  echo "❌ プロジェクト名を指定してください！"
-  echo "例: ./scripts/run_all.sh project1"
+# 実行するSQLファイルが入ったディレクトリ
+SQL_DIR="sql_code"
+
+# SQL ディレクトリの存在を確認
+if [ ! -d "$SQL_DIR" ]; then
+  echo "❌ 指定されたSQLフォルダが存在しません: $SQL_DIR"
   exit 1
 fi
 
-SQL_DIR="sql_code/\$PROJECT_NAME"
+echo "🔄 BigQuery処理を開始: プロジェクト = $PROJECT_ID, データセット = $DATASET"
 
-if [ ! -d "\$SQL_DIR" ]; then
-  echo "❌ 指定されたプロジェクトのフォルダが存在しません: \$SQL_DIR"
-  exit 1
-fi
-
-echo "🔄 BigQuery処理を開始: プロジェクト = \$PROJECT_NAME"
-
-for script in "\$SQL_DIR"/*.sql; do
-  echo "🚀 実行中: \$script"
-  bq query --use_legacy_sql=false < "\$script"
+# SQL ファイルを順番に実行
+for script in "$SQL_DIR"/*.sql; do
+  if [ -f "$script" ]; then
+    echo "🚀 実行中: $script"
+    bq query --use_legacy_sql=false --project_id="$PROJECT_ID" --dataset_id="$DATASET" < "$script"
+  else
+    echo "⚠️ SQLファイルが見つかりません: $script"
+  fi
 done
 
 echo "✅ すべての処理が完了しました！"
