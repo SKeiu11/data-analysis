@@ -1,7 +1,7 @@
-CREATE OR REPLACE TABLE `your_project.dataset.geofence_counts` AS
+CREATE OR REPLACE TABLE `rd-dapj-dev.raw_daimaruyu_data.{TABLE_NAME}_geocount` AS
 SELECT 
     geofence, 
     COUNT(*) AS count
-FROM `your_project.dataset.valid_stay_data`
+FROM `rd-dapj-dev.raw_daimaruyu_data.{TABLE_NAME}_15-90`
 GROUP BY geofence
 HAVING COUNT(*) >= 10;

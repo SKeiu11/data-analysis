@@ -1,10 +1,10 @@
-CREATE OR REPLACE TABLE `your_project.dataset.stay_time_data` AS
+CREATE OR REPLACE TABLE `rd-dapj-dev.raw_daimaruyu_data.{TABLE_NAME}` AS
 WITH ordered_data AS (
     SELECT
         uuid,
         geofence AS building,
         TIMESTAMP_SECONDS(timestamp) AS visit_time
-    FROM `your_project.dataset.mapped_location_data`
+    FROM `rd-dapj-dev.raw_daimaruyu_data.{TABLE_NAME}`
 ),
 session_data AS (
     SELECT

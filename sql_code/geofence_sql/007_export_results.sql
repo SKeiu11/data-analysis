@@ -1,7 +1,7 @@
 EXPORT DATA
 OPTIONS(
-    uri='gs://your-bucket-name/geofence_stay_counts.csv',
+    uri='gs://raw_daimaruyu/{TABLE_NAME}_geofence_stay_counts.csv',
     format='CSV',
     overwrite=true
 ) AS
-SELECT * FROM `your_project.dataset.geofence_counts`;
+SELECT * FROM `rd-dapj-dev.raw_daimaruyu_data.{TABLE_NAME}_geocount`;

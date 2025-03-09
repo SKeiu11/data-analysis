@@ -14,7 +14,7 @@ if [ -z "$TABLE_NAME" ]; then
 fi
 
 # SQL スクリプトディレクトリ
-SQL_DIR="sql_code"
+SQL_DIR="sql_code/geofence_sql"
 
 # フォルダの存在を確認
 if [ ! -d "$SQL_DIR" ]; then
@@ -28,7 +28,9 @@ echo "🔄 BigQuery処理を開始: プロジェクト = $PROJECT_ID, データ�
 for script in "$SQL_DIR"/*.sql; do
   if [ -f "$script" ]; then
     echo "🚀 実行中: $script"
-    sed "s/{TABLE_NAME}/$TABLE_NAME/g" "$script" | bq query --use_legacy_sql=false --project_id="$PROJECT_ID" --dataset_id="$DATASET"
+    sed "s/{TABLE_NAME}/$TABLE_NAME/g" "$script" > temp.sql
+    bq query --use_legacy_sql=false --project_id="$PROJECT_ID" --dataset_id="$DATASET" < temp.sql
+    rm temp.sql
   else
     echo "⚠️ SQLファイルが見つかりません: $script"
   fi

@@ -1,4 +1,4 @@
-CREATE OR REPLACE TABLE `your_project.dataset.valid_stay_data` AS
+CREATE OR REPLACE TABLE `rd-dapj-dev.raw_daimaruyu_data.{TABLE_NAME}_15-90` AS
 SELECT *
-FROM `your_project.dataset.stay_time_data`
+FROM `rd-dapj-dev.raw_daimaruyu_data.{TABLE_NAME}`
 WHERE stay_duration BETWEEN 15 AND 90;
