@@ -1,4 +1,4 @@
-CREATE OR REPLACE TABLE `your_project.dataset.raw_location_data` AS
+CREATE OR REPLACE TABLE `rd-dapj-dev.raw_daimaruyu_data.PDP_20211007` AS
 SELECT 
     uuid,
     latitude,
