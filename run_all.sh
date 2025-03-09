@@ -1,14 +1,26 @@
 #!/bin/bash
 
-# 設定ファイルの読み込み
-source config/sql_config.yaml
+# プロジェクトを指定
+PROJECT_NAME="\$1"
 
-echo "🔄 BigQuery処理を開始: ${project_id}.${dataset}"
+if [ -z "\$PROJECT_NAME" ]; then
+  echo "❌ プロジェクト名を指定してください！"
+  echo "例: ./scripts/run_all.sh project1"
+  exit 1
+fi
 
-# SQLファイルを順番に実行
-for script in sql_scripts/*.sql; do
-  echo "🚀 実行中: $script"
-  bq query --use_legacy_sql=false --project_id=${project_id} < "$script"
+SQL_DIR="sql_code/\$PROJECT_NAME"
+
+if [ ! -d "\$SQL_DIR" ]; then
+  echo "❌ 指定されたプロジェクトのフォルダが存在しません: \$SQL_DIR"
+  exit 1
+fi
+
+echo "🔄 BigQuery処理を開始: プロジェクト = \$PROJECT_NAME"
+
+for script in "\$SQL_DIR"/*.sql; do
+  echo "🚀 実行中: \$script"
+  bq query --use_legacy_sql=false < "\$script"
 done
 
 echo "✅ すべての処理が完了しました！"
