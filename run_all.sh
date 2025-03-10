@@ -10,39 +10,53 @@ TABLE_NAMES=("PDP_20211007" "PDP_20211008" "PDP_20231015" "PDP_20231016" "PDP_20
 # ✅ ワーカー判定用の5日分のデータ
 WORKER_REF_TABLES=("PDP_20231009" "PDP_20231010" "PDP_20231011" "PDP_20231012" "PDP_20231013")
 
-SQL_DIR="sql_code/attribute_sql"
+# GCSとBigQueryの同期待機
+echo "🔄 GCSとBigQueryの同期を待機中..."
+sleep 60  # 60秒待機
 
-if [ ! -d "$SQL_DIR" ]; then
-  echo "❌ 指定されたSQLフォルダが存在しません: $SQL_DIR"
-  exit 1
-fi
+# テーブル更新状態の確認
+for TABLE_NAME in "${TABLE_NAMES[@]}"; do
+  echo "📊 テーブル確認: $TABLE_NAME"
+  bq show $PROJECT_ID:$DATASET.$TABLE_NAME
+done
 
-echo "🔄 BigQuery処理を開始: プロジェクト = $PROJECT_ID, データセット = $DATASET"
+# まずgeofence_sqlを実行
+echo "🔄 Geofence SQLの実行を開始..."
+for TABLE_NAME in "${TABLE_NAMES[@]}"; do
+  echo "🚀 Geofence処理開始: $TABLE_NAME"
+  
+  for script in sql_code/geofence_sql/*.sql; do
+    if [ -f "$script" ]; then
+      echo "🔹 実行中: $script (対象テーブル: $TABLE_NAME)"
+      sed -e "s/{TABLE_NAME}/$TABLE_NAME/g" "$script" > temp.sql
+      bq query --use_legacy_sql=false --project_id="$PROJECT_ID" < temp.sql
+      rm temp.sql
+    fi
+  done
+done
+
+# 次にattribute_sqlを実行
+echo "🔄 Attribute SQLの実行を開始..."
 
 WORKER_REF_TABLES_JOINED=$(IFS=','; echo "${WORKER_REF_TABLES[*]}")
 
 echo "🚀 ワーカー判定用データセットを作成中..."
-sed "s/{WORKER_REF_TABLES}/$WORKER_REF_TABLES_JOINED/g" sql_code/00_create_worker_reference.sql > temp.sql
+sed "s/{WORKER_REF_TABLES}/$WORKER_REF_TABLES_JOINED/g" sql_code/attribute_sql/000_create_worker_reference.sql > temp.sql
 bq query --use_legacy_sql=false --project_id="$PROJECT_ID" < temp.sql
 rm temp.sql
 echo "✅ ワーカー判定データの準備が完了しました！"
 
-# ✅ 各6日分のデータを処理
 for TABLE_NAME in "${TABLE_NAMES[@]}"; do
-  echo "🚀 テーブル処理開始: $TABLE_NAME"
+  echo "🚀 Attribute処理開始: $TABLE_NAME"
   
-  for script in "$SQL_DIR"/*.sql; do
-    if [ -f "$script" ]; then
+  for script in sql_code/attribute_sql/*.sql; do
+    if [ -f "$script" ] && [[ $script != *"000_create_worker_reference.sql"* ]]; then
       echo "🔹 実行中: $script (対象テーブル: $TABLE_NAME)"
       sed -e "s/{TABLE_NAME}/$TABLE_NAME/g" -e "s/{WORKER_REF_TABLES}/$WORKER_REF_TABLES_JOINED/g" "$script" > temp.sql
       bq query --use_legacy_sql=false --project_id="$PROJECT_ID" < temp.sql
       rm temp.sql
-    else
-      echo "⚠️ SQLファイルが見つかりません: $script"
     fi
   done
-
-  echo "✅ テーブル $TABLE_NAME の処理が完了しました！"
 done
 
-echo "🎉 すべてのテーブルの処理が完了しました！"
+echo "🎉 すべての処理が完了しました！"
