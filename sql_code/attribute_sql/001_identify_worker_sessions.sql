@@ -1,10 +1,10 @@
-CREATE OR REPLACE TABLE `rd-dapj-dev.raw_daimaruyu_data.{TABLE_NAME}_worker_sessions` AS
+CREATE OR REPLACE TABLE `rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}_worker_sessions` AS
 WITH ordered_data AS (
     SELECT
         uuid,
         geofence AS building,
         visit_time
-    FROM `rd-dapj-dev.raw_daimaruyu_data.{TABLE_NAME}`
+    FROM `rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}_attributes`
 ),
 session_data AS (
     SELECT
@@ -40,4 +40,4 @@ SELECT
     total_stay_duration,
     FORMAT_DATE("%Y-%W", DATE(start_time)) AS week_number
 FROM stay_durations
-WHERE total_stay_duration BETWEEN 15 AND 90;
+WHERE total_stay_duration >= 15;

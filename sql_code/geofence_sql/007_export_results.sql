@@ -4,4 +4,4 @@ OPTIONS(
     format='CSV',
     overwrite=true
 ) AS
-SELECT * FROM `rd-dapj-dev.raw_daimaruyu_data.{TABLE_NAME}_geocount`;
+SELECT * FROM `rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}_geocount`;

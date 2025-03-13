@@ -60,3 +60,21 @@ for TABLE_NAME in "${TABLE_NAMES[@]}"; do
 done
 
 echo "🎉 すべての処理が完了しました！"
+
+# ローデータ用
+`rd-dapj-dev.raw_daimaruyu_data.{TABLE_NAME}`
+
+# 加工データ用
+`rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}`
+
+# 加工データ用データセットの作成
+bq mk --dataset --location=asia-northeast1 $PROJECT_ID:processed_daimaruyu_data
+
+# 最終的な結果テーブル
+CREATE OR REPLACE TABLE `rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}_final` AS
+SELECT 
+    r.*,  # ローデータの全カラム
+    p.*   # 処理で追加された属性
+FROM `rd-dapj-dev.raw_daimaruyu_data.{TABLE_NAME}` r
+LEFT JOIN `rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}_attributes` p
+ON r.uuid = p.uuid;

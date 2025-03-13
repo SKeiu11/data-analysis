@@ -1,10 +1,10 @@
-CREATE OR REPLACE TABLE `rd-dapj-dev.raw_daimaruyu_data.{TABLE_NAME}` AS
+CREATE OR REPLACE TABLE `rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}_stay_time` AS
 WITH ordered_data AS (
     SELECT
         uuid,
         geofence AS building,
-        TIMESTAMP_SECONDS(timestamp) AS visit_time
-    FROM `rd-dapj-dev.raw_daimaruyu_data.{TABLE_NAME}`
+        visit_time
+    FROM `rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}_attributes`
 ),
 session_data AS (
     SELECT
