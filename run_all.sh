@@ -75,11 +75,24 @@ echo "🎉 すべての処理が完了しました！"
 # 加工データ用
 `rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}`
 
-# 最終的な結果テーブル
-CREATE OR REPLACE TABLE `rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}_final` AS
-SELECT 
-    r.*,  # ローデータの全カラム
-    p.*   # 処理で追加された属性
-FROM `rd-dapj-dev.raw_daimaruyu_data.{TABLE_NAME}` r
-LEFT JOIN `rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}_attributes` p
-ON r.uuid = p.uuid;
+# 最終的な結果をraw_daimaruyu_dataに反映
+for TABLE_NAME in "${TABLE_NAMES[@]}"; do
+  echo "🔄 最終結果を反映中: $TABLE_NAME"
+  
+  bq query --use_legacy_sql=false --project_id="$PROJECT_ID" <<EOF
+    CREATE OR REPLACE TABLE \`rd-dapj-dev.raw_daimaruyu_data.${TABLE_NAME}\` AS
+    SELECT 
+        r.*,  -- 既存のカラム
+        a.geofence,
+        a.visit_time,
+        COALESCE(s.total_stay_duration, 0) AS stay_duration,
+        COALESCE(w.visit_style, 'visitor') AS visit_style
+    FROM \`rd-dapj-dev.raw_daimaruyu_data.${TABLE_NAME}\` r
+    LEFT JOIN \`rd-dapj-dev.processed_daimaruyu_data.${TABLE_NAME}_attributes\` a
+        ON r.uuid = a.uuid
+    LEFT JOIN \`rd-dapj-dev.processed_daimaruyu_data.${TABLE_NAME}_stay_time\` s
+        ON r.uuid = s.uuid
+    LEFT JOIN \`rd-dapj-dev.processed_daimaruyu_data.${TABLE_NAME}_workers\` w
+        ON r.uuid = w.uuid;
+EOF
+done

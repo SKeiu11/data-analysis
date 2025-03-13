@@ -1,7 +1,7 @@
 CREATE OR REPLACE TABLE `rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}_geocount` AS
 SELECT 
-    geofence, 
-    COUNT(*) AS count
-FROM `rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}_15-90`
-GROUP BY geofence
-HAVING COUNT(*) >= 10;
+    building AS geofence,
+    COUNT(DISTINCT uuid) as unique_visitors,
+    AVG(total_stay_duration) as avg_stay_duration
+FROM `rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}_stay_time`
+GROUP BY building;
