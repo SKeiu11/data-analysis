@@ -3,6 +3,14 @@
 # BigQuery プロジェクトIDとデータセットを指定
 PROJECT_ID="rd-dapj-dev"
 DATASET="raw_daimaruyu_data"
+LOCATION="asia-northeast1"
+
+# 加工データ用データセットの作成（最初に実行）
+echo "🔄 加工データ用データセットを作成中..."
+bq mk --dataset --location=$LOCATION $PROJECT_ID:processed_daimaruyu_data
+
+# クエリ実行時にロケーションを指定
+export BIGQUERY_DATASET_LOCATION=$LOCATION
 
 # ✅ 6日分のデータ（処理対象）
 TABLE_NAMES=("PDP_20211007" "PDP_20211008" "PDP_20231015" "PDP_20231016" "PDP_20231023" "PDP_20231029")
@@ -66,9 +74,6 @@ echo "🎉 すべての処理が完了しました！"
 
 # 加工データ用
 `rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}`
-
-# 加工データ用データセットの作成
-bq mk --dataset --location=asia-northeast1 $PROJECT_ID:processed_daimaruyu_data
 
 # 最終的な結果テーブル
 CREATE OR REPLACE TABLE `rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}_final` AS
