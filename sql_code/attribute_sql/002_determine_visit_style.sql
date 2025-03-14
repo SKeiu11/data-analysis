@@ -1,21 +1,40 @@
 CREATE OR REPLACE TABLE `rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}_workers` AS
-WITH worker_candidates AS (
+WITH daily_stay_time AS (
     SELECT
-        w.uuid,
-        w.building,
-        COUNT(DISTINCT r.visit_date) AS visit_days
-    FROM `rd-dapj-dev.processed_daimaruyu_data.worker_reference` AS r
-    JOIN `rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}_worker_sessions` AS w
-    ON r.uuid = w.uuid AND r.building = w.building
-    GROUP BY w.uuid, w.building
-    HAVING visit_days >= 3
+        uuid,
+        building,
+        DATE(start_time) as visit_date,
+        start_time,
+        end_time,
+        -- 8-20時の間の滞在時間のみを計算
+        TIMESTAMP_DIFF(
+            LEAST(
+                end_time,
+                TIMESTAMP(DATE(end_time), TIME(20, 0, 0))
+            ),
+            GREATEST(
+                start_time,
+                TIMESTAMP(DATE(start_time), TIME(8, 0, 0))
+            ),
+            MINUTE
+        ) as business_hours_duration
+    FROM `rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}_worker_sessions`
+    WHERE 
+        -- 8-20時の間に少しでも重なるセッションのみを対象とする
+        EXTRACT(HOUR FROM start_time) < 20 AND
+        EXTRACT(HOUR FROM end_time) > 8
+),
+total_daily_stay AS (
+    SELECT
+        uuid,
+        building,
+        visit_date,
+        SUM(business_hours_duration) as total_business_hours
+    FROM daily_stay_time
+    GROUP BY uuid, building, visit_date
 )
-SELECT
-    d.*,
-    CASE 
-        WHEN w.uuid IS NOT NULL THEN "worker"
-        ELSE "visitor"
-    END AS visit_style
-FROM `rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}_attributes` AS d
-LEFT JOIN worker_candidates AS w 
-ON d.uuid = w.uuid AND d.geofence = w.building;
+SELECT DISTINCT
+    d.uuid,
+    'worker' as visit_style
+FROM total_daily_stay d
+WHERE total_business_hours >= 360;  -- 6時間以上
