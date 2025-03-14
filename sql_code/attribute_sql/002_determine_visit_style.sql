@@ -1,4 +1,4 @@
-CREATE OR REPLACE TABLE `rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}_workers` AS
+CREATE OR REPLACE TABLE `{PROJECT_ID}.{PROCESSED_DATASET}.workers` AS
 WITH daily_stay_time AS (
     SELECT
         uuid,
@@ -18,7 +18,7 @@ WITH daily_stay_time AS (
             ),
             MINUTE
         ) as business_hours_duration
-    FROM `rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}_worker_sessions`
+    FROM `{PROJECT_ID}.{PROCESSED_DATASET}.worker_sessions`
     WHERE 
         -- 8-20時の間に少しでも重なるセッションのみを対象とする
         EXTRACT(HOUR FROM start_time) < 20 AND

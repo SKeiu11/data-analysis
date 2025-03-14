@@ -1,10 +1,10 @@
-CREATE OR REPLACE TABLE `rd-dapj-dev.raw_daimaruyu_data.{TABLE_NAME}_building_staytime` AS
+CREATE OR REPLACE TABLE `{PROJECT_ID}.{PROCESSED_DATASET}.{TABLE_NAME}_building_staytime` AS
 WITH stay_summaries AS (
     SELECT
         uuid,
         building AS building_name,
         SUM(total_stay_duration) AS building_staytime
-    FROM `rd-dapj-dev.raw_daimaruyu_data.{TABLE_NAME}_worker_sessions`
+    FROM `{PROJECT_ID}.{PROCESSED_DATASET}.worker_sessions`
     GROUP BY uuid, building
 ),
 ranked_stay AS (
@@ -16,9 +16,10 @@ ranked_stay AS (
     FROM stay_summaries
 )
 SELECT
-    d.*,
+    w.uuid,
+    w.visit_style,
     COALESCE(r.building_name, "Unknown") AS building_name,
     COALESCE(r.building_staytime, 0) AS building_staytime
-FROM `rd-dapj-dev.raw_daimaruyu_data.{TABLE_NAME}_workers` AS d
+FROM `{PROJECT_ID}.{PROCESSED_DATASET}.workers` AS w
 LEFT JOIN ranked_stay AS r
-ON d.uuid = r.uuid AND r.rank = 1;
+ON w.uuid = r.uuid AND r.rank = 1;

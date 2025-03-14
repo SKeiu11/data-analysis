@@ -4,8 +4,7 @@ CREATE OR REPLACE TABLE `rd-dapj-dev.processed_daimaruyu_data.geofence_regions`
     zone_name STRING
 )
 OPTIONS(
-    description="ジオフェンスの領域定義",
-    location="asia-northeast1"
+    description="ジオフェンスの領域定義"
 );
 
 # GEOGRAPHYデータの挿入

@@ -1,6 +1,6 @@
 EXPORT DATA
 OPTIONS(
-    uri='gs://raw_daimaruyu/{TABLE_NAME}_geofence_stay_counts.csv',
+    uri='gs://raw_daimaruyu/geofence_stay_counts/*.csv',
     format='CSV',
     overwrite=true
 ) AS

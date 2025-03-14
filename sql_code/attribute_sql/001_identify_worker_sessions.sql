@@ -1,10 +1,12 @@
-CREATE OR REPLACE TABLE `rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}_worker_sessions` AS
+CREATE OR REPLACE TABLE `{PROJECT_ID}.{PROCESSED_DATASET}.worker_sessions` AS
 WITH ordered_data AS (
     SELECT
         uuid,
-        geofence AS building,
+        zone_name AS building,
         visit_time
-    FROM `rd-dapj-dev.processed_daimaruyu_data.{TABLE_NAME}_attributes`
+    FROM `{PROJECT_ID}.{PROCESSED_DATASET}.worker_reference`
+    CROSS JOIN `{PROJECT_ID}.{PROCESSED_DATASET}.geofence_regions`
+    WHERE ST_CONTAINS(region, ST_GEOGPOINT(longitude, latitude))
 ),
 session_data AS (
     SELECT
